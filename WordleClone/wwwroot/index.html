@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>WordleClone</title>
+    <base href="/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="WordleClone.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">Loading...</div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        function getTileElement(currentRow, currentColumn, letter) {
+            const tile = document.getElementById('guessRow-' + currentRow + '-tile-' + currentColumn)
+            tile.textContent = letter;
+            tile.setAttribute('data', letter);
+        }
+    </script>
+
+    <script>
+        function deleteLetter(currentRow, currentColumn) {
+            const tile = document.getElementById('guessRow-' + currentRow + '-tile-' + currentColumn)
+            tile.textContent = '';
+            tile.setAttribute('data', '');
+        }
+    </script>
+
+    <script>
+        function flipTile(currentRow, wordle) {
+            const rowTiles = document.querySelector('#guessRow-' + currentRow).childNodes
+
+            let checkWordle = wordle;
+            const guess = [];
+
+            rowTiles.forEach((tile) => {
+                guess.push({ letter: tile.getAttribute('data'), color: 'grey-overlay' })
+            })
+
+            guess.forEach((guess, index) => {
+                if (guess.letter == wordle[index]) {
+                    guess.color = 'green-overlay';
+                    checkWordle = checkWordle.replace(guess.letter, '');
+                }
+                else if (guess.letter != wordle[index] && checkWordle.includes(guess.letter))
+                {
+                    guess.color = 'yellow-overlay';
+                    checkWordle = checkWordle.replace(guess.letter, '');
+                }
+            })
+
+            rowTiles.forEach((tile, index) => {
+                setTimeout(() => {
+                    tile.classList.add('flip')
+                    tile.classList.add(guess[index].color)
+                    addColorToKey(guess[index].letter, guess[index].color)
+                }, 500 * index)
+            })
+        }
+    </script>
+
+    <script>
+        function addColorToKey(keyLetter, colorClass) {
+
+            const key = document.getElementById(keyLetter);
+
+            key.classList.add(colorClass);
+        }
+    </script>
+
+    <script>
+        function endGame() {
+
+            const allTiles = document.querySelectorAll('div[data]')
+            allTiles.forEach((tile) => {
+                tile.textContent = '';
+                tile.setAttribute('data', '')
+            })
+
+            const greenElements = document.getElementsByClassName('green-overlay');
+            const yellowElements = document.getElementsByClassName('yellow-overlay');
+            const greyElements = document.getElementsByClassName('grey-overlay');
+
+            Array.from(greenElements).forEach((element) => {
+                element.className = '';
+                element.classList.add('tile')
+            })
+
+            Array.from(yellowElements).forEach((element) => {
+                element.className = '';
+                element.classList.add('tile')
+
+            })
+
+            Array.from(greyElements).forEach((element) => {
+                element.className = '';
+                element.classList.add('tile')
+
+            })
+            
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+
+
+.game-container[b-oshxqrm37e]{
+    height:90vh;
+    display: flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items: center;
+}
+
+.title-container[b-oshxqrm37e]{
+    text-align:center;
+    width: 510px;
+    border-bottom: solid 1px #3a3a3a;
+}
+
+.tile-container[b-oshxqrm37e]{
+    width:330px;
+    margin-bottom: 30px;
+}
+
+.key-line button[b-oshxqrm37e]{
+    min-width:3rem;
+    min-height:3rem;
+    margin: 1px
+}
+
+.keys-container[b-oshxqrm37e]{
+    width:510px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom: 30px;
+}
+
+.tile-container div[b-oshxqrm37e]{
+    display:flex;
+}
+
+.tile-container .tile[b-oshxqrm37e]{
+    width:62px;
+    height:62px;
+    border: 2px solid #3a3a3c;
+    box-sizing:border-box;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:2px;
+}
+
+.message-container[b-oshxqrm37e]{
+    height:30px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+#play-again[b-oshxqrm37e] {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+.message-container p[b-oshxqrm37e] {
+    background-color: #818384;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 0;
+}
+
+.grey-overlay[b-oshxqrm37e]{
+    background-color: #3a3a3c !important;
+    border: none !important;
+}
+
+.yellow-overlay[b-oshxqrm37e] {
+    background-color: #b59f3a !important;
+    border: none !important;
+}
+
+.green-overlay[b-oshxqrm37e] {
+    background-color: #538d4e !important;
+    border: none !important;
+}
+
+/*animations*/
+
+@keyframes flipping-b-oshxqrm37e{
+    0%{
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+.tile.flip[b-oshxqrm37e]{
+    animation: 0.5s linear flipping-b-oshxqrm37e;
+}

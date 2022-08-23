@@ -1,0 +1,260 @@
+﻿@page "/"
+@using Microsoft.JSInterop
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Index</PageTitle>
+
+<h1>Wordle Clone</h1>
+
+<p>Try this wordle clone!</p>
+
+<div class="game-container">
+    <div class="title-container">
+        <h1>Wordle</h1>
+    </div>
+
+    <div class="message-container">
+        @if (messageDisplay.Length > 0)
+        {
+            <p>@messageDisplay</p>
+        }
+        @if(isGameOver is true){
+            <button id="play-again" @onclick="(()=> playAgain())">Play again?</button>
+        }
+    </div>
+    <div class="tile-container">
+
+        @for (int row = 0; row < guessRows.Length; row++)
+        {
+            <div id="guessRow-@row">
+                @for (int column = 0; column < guessRows[row].Length; column++)
+                {
+                    <div class="tile" id="guessRow-@row-tile-@column">@guessRows[row][column]</div>
+                }
+            </div>
+        }
+    </div>
+
+
+    <div class="keys-container">
+        <div class="key-line">
+
+            @foreach (string key in FirstLinesOfKeys)
+            {
+                <button id="@key" @onclick="(()=> handleClick(key))">@key</button>
+            }
+        </div>
+
+        <div class="key-line">
+
+            @foreach (var key in SecondLinesOfKeys)
+            {
+                <button id="@key" @onclick="(()=> handleClick(key))">@key</button>
+            }
+        </div>
+
+        <div class="key-line">
+
+            @foreach (var key in LastLinesOfKeys)
+            {
+                <button id="@key" @onclick="(()=> handleClick(key))">@key</button>
+            }
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+
+    [Inject]
+    private HttpClient Http { get; set; }
+
+    string wordle = "DANCE";
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    var result = await Http.GetAsync("https://random-word-api.herokuapp.com/word?length=5");
+
+    //    using var responseStream = await result.Content.ReadAsStreamAsync();
+    //    var wordleResponseWord = await JsonSerializer.DeserializeAsync<string[]>(responseStream);
+
+    //    wordle = wordleResponseWord[0].ToUpper();
+    //}
+
+
+
+    [Parameter]
+    public string messageDisplay { get; set; } = "";
+
+    [Parameter]
+    public bool isGameOver { get; set; } = false;
+
+    private List<string> FirstLinesOfKeys = new List<string>
+
+    {
+        "Q",
+        "W",
+        "E",
+        "R",
+        "T",
+        "Y",
+        "U",
+        "I",
+        "O",
+        "P",
+    };
+    private List<string> SecondLinesOfKeys = new List<string>
+
+    {
+        "A",
+        "S",
+        "D",
+        "F",
+        "G",
+        "H",
+        "J",
+        "K",
+        "L",
+    };
+
+    private List<string> LastLinesOfKeys = new List<string>
+    {
+
+        "Enter",
+        "Z",
+        "X",
+        "C",
+        "V",
+        "B",
+        "N",
+        "M",
+        "Delete",
+
+    };
+
+    private char[][] guessRows =
+    {
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+        new char[]{' ', ' ', ' ', ' ', ' ' },
+    };
+
+    int currentRow = 0;
+    int currentColumn = 0;
+
+    public void handleClick(string key)
+    {
+        if (isGameOver is false)
+        {
+
+            if (key == "Delete")
+            {
+                // delete letter
+                DeleteLetter();
+                return;
+            }
+            if (key == "Enter")
+            {
+                //check letter
+                checkRow();
+                return;
+            }
+            addLetter(key);
+        }
+    }
+
+    private async void addLetter(string letter)
+    {
+        if (currentColumn < 5 && currentRow < 6)
+        {
+            await JsRuntime.InvokeVoidAsync("getTileElement", currentRow, currentColumn, letter);
+
+            //puts the letter in guessrow to compare with wordle
+            guessRows[currentRow][currentColumn] = char.Parse(letter);
+
+            currentColumn++;
+        }
+
+    }
+
+    private async void DeleteLetter()
+    {
+
+        if (currentColumn > 0)
+        {
+            currentColumn--;
+            await JsRuntime.InvokeVoidAsync("deleteLetter", currentRow, currentColumn);
+            guessRows[currentRow][currentColumn] = ' ';
+        }
+
+    }
+
+    private async void checkRow()
+    {
+        if (currentColumn > 4)
+        {
+            await FlipTile();
+            string guess = new string(guessRows[currentRow]);
+            if (guess == wordle)
+            {
+                isGameOver = true;
+                await DisplayAMessage("You guessed correctly");
+                EndGame();
+                return;
+            }
+            else
+            {
+                if (currentRow >= 5)
+                {
+                    isGameOver = true;
+                    await DisplayAMessage($"Game Over, the word was: {wordle.ToUpper()}");
+                    EndGame();
+
+                    return;
+                }
+                if (currentRow < 5)
+                {
+                    currentRow++;
+                    currentColumn = 0;
+                }
+            }
+        }
+    }
+
+    private async Task EndGame()
+    {
+        await JsRuntime.InvokeVoidAsync("endGame");
+    }
+
+    private async Task DisplayAMessage(string messageToDisplay)
+    {
+        messageDisplay = messageToDisplay;
+        await InvokeAsync(() => StateHasChanged());
+        await Task.Delay(5000);
+        messageDisplay = "";
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    private async Task FlipTile()
+    {
+        await JsRuntime.InvokeVoidAsync("flipTile", currentRow, wordle);
+    }
+
+    public async Task playAgain()
+    {
+        await this.OnInitializedAsync();
+        currentRow = 0;
+        currentColumn = 0;
+        isGameOver = false;
+    }
+
+
+}
+
+
