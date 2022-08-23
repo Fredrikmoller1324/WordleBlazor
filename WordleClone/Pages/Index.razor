@@ -72,17 +72,17 @@
     [Inject]
     private HttpClient Http { get; set; }
 
-    string wordle = "DANCE";
+    string wordle = "";
 
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    var result = await Http.GetAsync("https://random-word-api.herokuapp.com/word?length=5");
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetAsync("https://random-word-api.herokuapp.com/word?length=5");
 
-    //    using var responseStream = await result.Content.ReadAsStreamAsync();
-    //    var wordleResponseWord = await JsonSerializer.DeserializeAsync<string[]>(responseStream);
+        using var responseStream = await result.Content.ReadAsStreamAsync();
+        var wordleResponseWord = await JsonSerializer.DeserializeAsync<string[]>(responseStream);
 
-    //    wordle = wordleResponseWord[0].ToUpper();
-    //}
+        wordle = wordleResponseWord[0].ToUpper();
+    }
 
 
 
